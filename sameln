@@ -1,0 +1,28 @@
+#!/bin/bash
+RESULT=`ls -a $1 | sort`
+declare -a ARRAY
+let count=0
+for FILE in $RESULT
+do
+		if [ ! -r "$1/$FILE" ]
+			then echo "$1/$FILE" is not readable 1>&2
+		elif [ -f "$1/$FILE" ]
+			then 
+				ARRAY[$count]="$1/$FILE"
+				let count=count+1
+		fi
+done
+
+for (( i=0; i<$count; i++ ))
+do
+	for (( j=i+1; j<$count; j++ ))
+	do
+		cmp -s "${ARRAY[$i]}" "${ARRAY[$j]}"
+		if [ $? -eq 0 ]
+			then
+			echo "${ARRAY[$i]}" and "${ARRAY[$j]}" are duplicates
+			rm "${ARRAY[$j]}"
+			ln "${ARRAY[$i]}" "${ARRAY[$j]}"
+		fi
+	done
+done
